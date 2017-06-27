@@ -1,5 +1,5 @@
 <?php
-class Controller_Login {
+class Controller_Login extends Controller_Base{
 	
 	/**
      * Constructor
@@ -21,6 +21,10 @@ class Controller_Login {
      * @param json response
      */
 	protected function index() {
+        if(!$this->validateMethod('post')) {
+			echo json_encode(array('status' => 400, 'error' => 'Incorrect method'));
+            return;
+        }
 		if($this->checkInput()) {
 			if($user = $this->model->isValidUser($this->input['username'], $this->input['password'])) {
                 $token = $this->model->getToken($user->id);

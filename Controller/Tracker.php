@@ -1,5 +1,5 @@
 <?php
-class Controller_Tracker {	
+class Controller_Tracker extends Controller_Base{	
 	protected $tracker_settings, $method, $input;
     
     /**
@@ -20,6 +20,12 @@ class Controller_Tracker {
      * @param json response
      */
 	protected function index() {
+        // ensure correct method is used
+        if(!$this->validateMethod('get')) {
+			echo json_encode(array('status' => 400, 'error' => 'Incorrect method'));
+            return;
+        }
+        // process client info
         $info = array(
             'date_time' => date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME']),
             'campaign_id' => $_REQUEST['c'],
@@ -30,12 +36,21 @@ class Controller_Tracker {
         );
 
         $filepath = ROOT_DIR . DIR_SEPARATOR . 'event_logs' . DIR_SEPARATOR;
+        $filepath .= 'event_log_'.date('Y-m-d-H-i-s').'.csv';
 
-        $myfile = file_put_contents($filepath, implode('^', $info).PHP_EOL , FILE_APPEND);
+        file_put_contents($filepath, implode('^', $info).PHP_EOL , FILE_APPEND);
         
-        // display a transparent pixel
-        header('Content-Type: image/gif');
-        readfile('tracking.gif');
+        // track open event
+        // track and redirect click event
+        if($info['event']=='open') {
+            // display a transparent pixel
+            header('Content-Type: image/gif');
+            readfile('tracking.gif');
+        } elseif($info['event']=='click' && !empty($_REQUEST['r'])) {
+            // redirect to the click url
+            header("Location: ".  urldecode($_REQUEST['r']));
+            die();
+        }
 	}
 
     /**

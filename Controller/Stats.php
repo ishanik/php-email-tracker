@@ -1,8 +1,7 @@
 <?php
-class Controller_Stats {
+class Controller_Stats extends Controller_Base{
 	protected $usermodel;
     protected $model;
-    protected $method;
     protected $input;
         
     /**
@@ -28,6 +27,11 @@ class Controller_Stats {
      * @param json response
      */
 	protected function index() {
+        //ensure method used is POST
+        if(!$this->validateMethod('post')) {
+			echo json_encode(array('status' => 400, 'error' => 'Incorrect method'));
+            return;
+        }
         // Check if start/end date provided
         if(empty($this->input['start_date']) || empty($this->input['end_date'])) {
             echo json_encode(array('status' => 400, 'error' => 'Missing parameters'));
